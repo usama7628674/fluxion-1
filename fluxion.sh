@@ -501,9 +501,9 @@ fluxion_handle_target_change() {
     fluxion_conditional_bail "Target tracker failed to stop attack."
   fi
 
-  if ! unprep_attack; then
-    fluxion_conditional_bail "Target tracker failed to unprep attack."
-  fi
+  #if ! unprep_attack; then
+  #  fluxion_conditional_bail "Target tracker failed to unprep attack."
+  #fi
 
   if ! load_attack "$FLUXIONPath/attacks/$FluxionAttack/attack.conf"; then
     fluxion_conditional_bail "Target tracker failed to load attack."
@@ -1355,7 +1355,7 @@ fluxion_target_tracker_daemon() {
   if [ ! "$1" ]; then return 1; fi # Assure we've got fluxion's PID.
 
   readonly fluxionPID=$1
-  readonly monitorTimeout=10 # In seconds.
+  readonly monitorTimeout=15 # In seconds.
   readonly capturePath="$FLUXIONWorkspacePath/tracker_capture"
 
   if [ \
@@ -1404,6 +1404,8 @@ fluxion_target_tracker_daemon() {
 
   # NOTICE: Using different signals for different things is a BAD idea.
   # We should use a single signal, SIGINT, to handle different situations.
+  Old_AP_Authenticator_Pid=$(ps a | grep -E "FLUXION AP Authenticator" | head -n 1 | awk '{print $1}')
+  kill $Old_AP_Authenticator_Pid > /dev/null
   kill -s SIGALRM $fluxionPID # Signal fluxion a change was detected.
 
   sandbox_remove_workfile "$capturePath-*"
